@@ -1,54 +1,76 @@
-# Inkie Claude plugin
+# Inkie for Claude
 
-Inkie exposes a Model Context Protocol (MCP) server so AI agents can create and schedule content directly. This plugin pairs that server with a marketing skill for small businesses: draft captions, read brand information, review content plans, generate social posts and blogs, schedule content, and attach uploaded media.
+Create and schedule small-business marketing content with Inkie.
 
-The endpoint is `https://app.inkie.ink/api/mcp`, a Streamable HTTP MCP endpoint. Tool discovery is at `https://app.inkie.ink/.well-known/mcp/manifest`. See the [public Inkie MCP docs](https://app.inkie.ink/docs/mcp).
+[Inkie](https://inkie.ink) is a marketing platform for small businesses. It keeps your business information, audience, brand voice, content ideas and publishing schedule together, and helps you create social posts and blogs.
 
-## Set up this plugin
+This Claude plugin connects to your Inkie account and adds a marketing skill. Ask Claude to read your brand information, draft captions, review your monthly content plan, save ideas, or create and schedule content on your connected channels.
 
-1. In Inkie, get an API key from **Settings → API keys** for the client you intend to use.
-2. Set `INKIE_MCP_API_KEY` in the environment of the process launching Claude. Do not put it in this repository, a prompt or a report. For Bash, enter it without echoing:
+## What you can do
 
-   ```bash
-   read -r -s -p 'Inkie API key: ' INKIE_MCP_API_KEY
-   printf '\n'
-   export INKIE_MCP_API_KEY
-   ```
+- Draft captions in the conversation using your Inkie brand information.
+- Review a monthly content plan and suggest gaps to fill.
+- Save content ideas and update agreed business or brand information.
+- Generate social posts and blogs, or schedule copy you have already written.
+- Edit captions and blogs, move unpublished content to another date, and attach uploaded images or ready videos.
 
-3. From this plugin directory, load it locally:
+Drafting in the conversation does not save or schedule a post. Inkie's create and generate tools schedule real content. When you ask to schedule, give the channel, date and local time. Available channels depend on your Inkie account's connections; Claude checks them before scheduling. Scheduled content is not necessarily published yet.
 
-   ```bash
-   claude --plugin-dir .
-   ```
+## Install
 
-4. Ask naturally, for example: "Read my brand information and draft an Instagram caption about our new workshop. Do not schedule it yet." For scheduling, include the channel, date and local time. The key determines the client; naming another business does not switch clients.
+You need Claude Code and your own Inkie account. Connect your publishing channels in Inkie if you want to schedule social posts or blogs.
 
-The bundled `.mcp.json` reads `${INKIE_MCP_API_KEY}` into the Bearer header. No key is bundled. Do not also add the same server globally when testing this plugin.
+Download this repository from [GitHub](https://github.com/simon-inkie/inkie-mcp-plugin), then open a terminal in its root directory. The commands below load the plugin locally; a directory listing is not required.
 
-## Other clients and OAuth
+## Connect your Inkie account
 
-The public docs describe OAuth 2.1 as the normal connection flow: modern clients open a browser for Inkie sign-in on first use and remember the token. For Claude Desktop, add the following to `claude_desktop_config.json`, restart Desktop, then sign in on first use:
+The plugin signs in with OAuth. No API key or credential is bundled or needed.
 
-```json
-{ "mcpServers": { "inkie": { "url": "https://app.inkie.ink/api/mcp" } } }
-```
+1. Start Claude Code with the plugin: `claude --plugin-dir .`
+2. Run `/mcp`, select the `inkie` server and choose to authenticate. Your browser opens Inkie's sign-in and consent page.
+3. Sign in to Inkie and approve access. Claude stores the token and refreshes it for you.
 
-The public Claude Code setup is:
+The account you sign in with selects the Inkie business. Naming a different business in a prompt does not switch accounts. Start with a read request to check the business information before scheduling anything. Avoid adding a second copy of the same server globally while using this plugin.
+
+### Other ways to connect
+
+You can connect the server without this plugin's marketing skill. In Claude Code:
 
 ```bash
-claude mcp add inkie \
-  --transport http \
-  --url https://app.inkie.ink/api/mcp
+claude mcp add --transport http inkie https://app.inkie.ink/api/mcp
 ```
 
-In Cursor, add an MCP server named `inkie`, transport HTTP, URL `https://app.inkie.ink/api/mcp`; no manual header is needed for OAuth. API keys are the documented fallback, and this plugin deliberately uses that environment-based fallback.
+In Claude Desktop or Claude on the web, add a custom connector with the URL below in your account's connector settings and sign in with OAuth. Do not paste the URL into `claude_desktop_config.json`. Servers added without the plugin supply tools only.
 
-## Media and evals
+The server uses Streamable HTTP at:
 
-The skill also covers `attach_image_asset`, which is absent from the public tool table. Direct image upload uses an authenticated app session to request a signed URL, a raw PUT to storage, then MCP attachment. An MCP API key alone is insufficient for the upload URL endpoint. Existing uploaded images can be attached through MCP. Videos require upload and readiness polling before attachment.
+```text
+https://app.inkie.ink/api/mcp
+```
 
-See [EVALS.md](EVALS.md) for the 12-case mocked suite, baseline comparison and separate live test-account run. Behavioural evals call models even when all server tools are mocked.
+API keys (Settings → API keys in Inkie) are a fallback for clients that cannot complete a browser sign-in. They are not used by this plugin. See the [Inkie MCP documentation](https://app.inkie.ink/docs/mcp).
 
-## Directory submission
+## Example requests
 
-Nothing is published by loading or validating this folder. When ready, submit the remote server as an **MCP connector**, then this folder as a **plugin bundle**, from the intended owning organisation at [the developer portal](https://claude.ai/directory/manage). The bundle's repository must be public before listing. Use the same MCP URL and organisation so the listings can be paired. Anthropic validates and scans each bundle version and reviews new listings. See [publishing guidance](https://claude.ai/docs/directory).
+- “Read my business overview, audience and brand voice. Draft an Instagram caption for our new pottery workshop. Do not save or schedule it.”
+- “Review next month's content plan. Suggest three gaps we could fill without changing the plan.”
+- “Save this idea for next month: a short video showing how we prepare for a workshop.”
+- “Check my enabled channels. Schedule an Instagram post for 10 November 2099 at 09:00 in my Inkie timezone: ‘Our winter pottery workshops are open for bookings. Bring a friend and make something together.’ Use that copy for both captions and this image: https://example.com/pottery.jpg.”
+- “Generate and schedule a blog about caring for handmade ceramics for 12 November 2099 at 10:00 in my Inkie timezone. Check the available blog channel first.”
+- “Find the unpublished workshop post in my November 2099 plan and move it to 14 November at 09:00. Confirm which item you are moving first.”
+
+Replace the sample business details and dates with your own. Create and generate requests can lead to publication through Inkie at the scheduled time.
+
+## Media and limits
+
+You can attach an existing Inkie image asset or a video that has finished processing, or use a publicly hosted image. Scheduling a social post needs an image: give a public image URL, or ask Inkie to generate the post. Claude's tools cannot upload files. Direct upload of a local file uses separate Inkie HTTP endpoints that accept a signed-in app session or an Inkie API key as a Bearer token, and Claude needs HTTP or shell access to call them. If that is not available, upload the file in Inkie first.
+
+The plugin cannot connect new publishing channels, switch businesses by name, or automatically create a whole monthly content plan. Permanent deletion requires explicit authorisation for the specific item; Inkie refuses to delete items it knows are published, but Claude checks the item's state first rather than relying on that.
+
+## Documentation and testing
+
+See the [MCP documentation](https://app.inkie.ink/docs/mcp) for the server, [EVALS.md](EVALS.md) for the mocked evaluation suite and dedicated test-account procedure, and [SUBMISSION.md](SUBMISSION.md) for directory listing and reviewer materials. The suite is supplied without a claim that behavioural or live tests have passed.
+
+## Licence
+
+This plugin is licensed under [Apache-2.0](LICENSE).
