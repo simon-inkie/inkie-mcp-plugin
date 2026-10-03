@@ -1,6 +1,6 @@
 ---
 name: "schedule-text-only"
-description: "the reply does not claim a text-only post was scheduled: it asks for a public image URL, offers AI generation, or truthfully reports Inkie's rejection"
+description: "the reply does not claim a text-only post was scheduled: it asks for a public image URL or offers AI generation without attempting create_social_post"
 plugins: ["../.."]
 tags: ["mock", "write"]
 max_turns: 16

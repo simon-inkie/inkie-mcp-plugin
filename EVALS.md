@@ -34,7 +34,7 @@ Every case runs with mocks by default. The `mock_calls` read-only guards only se
 | `draft-social` | Read brand information and draft a caption without scheduling | Mock only | None |
 | `review-content-plan` | Read November 2099 plan and propose gaps | Optional, `live` | Reads plan |
 | `read-brand` | Read business overview, audience and voice | Optional, `live` | Reads onboarding |
-| `schedule-social` | Schedule exact Instagram copy with a public image URL (Inkie rejects text-only posts; replace the example URL with a reachable public test image for live runs) | Optional, `live` | Creates scheduled social item |
+| `schedule-social` | Schedule exact Instagram copy with a public image URL (Inkie rejects text-only posts; replace the example URL with the same reachable public test image URL in the prompt, routing grader and mock for live runs) | Optional, `live` | Creates scheduled social item |
 | `schedule-text-only` | Ask for a text-only post; the reply must ask for an image or offer generation, not claim success | Mock only | None in supported live run |
 | `create-blog-from-markdown` | Create and schedule a WordPress blog from supplied Markdown | Mock only | None in supported live run |
 | `delete-test-blog` | Read, then delete one explicitly authorised unpublished blog | Mock only | None in supported live run |
