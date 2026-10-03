@@ -1,0 +1,851 @@
+{
+  "tools": [
+    {
+      "name": "get_platforms",
+      "description": "Get available social and blog platforms for the authenticated client. Returns both enabled platforms (currently active) and all connected platforms (including temporarily disabled ones). You can post to any platform in the 'all' list.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "create_social_post",
+      "description": "Create a fully-formed social post from complete data. All fields are required. Returns immediately with SCHEDULED status. Use this when you have the complete caption, image, and other details ready. Provide 2-10 imageUrls to publish as a carousel.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "platforms",
+          "scheduledDate",
+          "caption",
+          "shortFormCaption"
+        ],
+        "properties": {
+          "platforms": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "instagram",
+                "facebook",
+                "bluesky"
+              ]
+            },
+            "description": "Social media platforms to post to",
+            "minItems": 1
+          },
+          "scheduledDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO datetime WITHOUT timezone suffix (e.g., 2025-10-15T14:30:00). This represents the local time you want the post to go out. The server converts to UTC using your account's configured timezone."
+          },
+          "caption": {
+            "type": "string",
+            "description": "Full caption text (up to 2200 characters for Instagram)",
+            "maxLength": 2200
+          },
+          "shortFormCaption": {
+            "type": "string",
+            "description": "Shortened caption for X/Bluesky (approximately 280 characters)",
+            "maxLength": 500
+          },
+          "imageUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "External image URL to import (max 10MB, must be publicly accessible). Provide EITHER imageUrl (single image) OR imageUrls (carousel), not both."
+          },
+          "imageUrls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            },
+            "minItems": 2,
+            "maxItems": 10,
+            "description": "2-10 image URLs to publish as a carousel. Provide EITHER imageUrl (single) OR imageUrls (carousel), not both."
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional tags for categorization"
+          },
+          "utm": {
+            "type": "object",
+            "properties": {
+              "campaign": {
+                "type": "string",
+                "description": "UTM campaign parameter"
+              },
+              "source": {
+                "type": "string",
+                "description": "UTM source parameter"
+              },
+              "medium": {
+                "type": "string",
+                "description": "UTM medium parameter"
+              }
+            },
+            "description": "Optional UTM tracking parameters"
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "generate_social_post",
+      "description": "Generate a social post using AI. Provide a captionIdea and AI will generate captions and optionally find an image. Returns 202 with statusUrl for polling progress. Use this when you want AI to help create the content. Provide 2-10 imageUrls to generate a carousel post with your own images.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "platforms",
+          "scheduledDate",
+          "captionIdea"
+        ],
+        "properties": {
+          "platforms": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "instagram",
+                "facebook",
+                "bluesky"
+              ]
+            },
+            "description": "Social media platforms to post to",
+            "minItems": 1
+          },
+          "scheduledDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO datetime WITHOUT timezone suffix (e.g., 2025-10-16T10:00:00). This represents the local time you want the post to go out. The server converts to UTC using your account's configured timezone."
+          },
+          "captionIdea": {
+            "type": "string",
+            "description": "What the post should be about - AI will generate complete captions from this idea"
+          },
+          "imageUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Optional - provide an image URL to skip AI image generation. If omitted, AI will find a relevant stock image. Provide EITHER imageUrl (single image) OR imageUrls (carousel), not both."
+          },
+          "imageUrls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            },
+            "minItems": 2,
+            "maxItems": 10,
+            "description": "2-10 image URLs to publish as a carousel. Provide EITHER imageUrl (single) OR imageUrls (carousel), not both."
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional tags"
+          },
+          "utm": {
+            "type": "object",
+            "properties": {
+              "campaign": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              },
+              "medium": {
+                "type": "string"
+              }
+            },
+            "description": "Optional UTM parameters"
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_post_status",
+      "description": "Poll the generation status of a post created with generate_social_post. Use this to check progress until state becomes SCHEDULED.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "postId"
+        ],
+        "properties": {
+          "postId": {
+            "type": "number",
+            "description": "The post ID returned from create_social_post or generate_social_post"
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_post",
+      "description": "Get full details of a post including caption, shortFormCaption, scheduled date in client timezone, and images. The response includes an images[] array (ordered; cover = first) and a back-compat image field (the cover image). Use this after a post is SCHEDULED to see the final content.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "postId"
+        ],
+        "properties": {
+          "postId": {
+            "type": "number",
+            "description": "The post ID to retrieve"
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_content_plan",
+      "description": "Get the content plan and all scheduled items for a given month. Use this to see what content is already scheduled before creating new posts. Returns plan metadata, all items (social posts and blogs), and a summary.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "month"
+        ],
+        "properties": {
+          "month": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}$",
+            "description": "Month in YYYY-MM format (e.g., '2025-01' for January 2025)"
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "create_blog_post",
+      "description": "Create a fully-formed blog post from complete data. Title, body, caption, and shortFormCaption are required. Creates the blog and its associated social_post promo row in one call. Returns immediately with SCHEDULED status. Use this when you have the complete blog content ready.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "platforms",
+          "scheduledDate",
+          "title",
+          "body",
+          "caption",
+          "shortFormCaption"
+        ],
+        "properties": {
+          "platforms": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "wordpress",
+                "wix"
+              ]
+            },
+            "description": "Blog platforms to publish to",
+            "minItems": 1
+          },
+          "scheduledDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO datetime WITHOUT timezone suffix (e.g., 2025-10-15T14:30:00). Local time, server converts to UTC."
+          },
+          "title": {
+            "type": "string",
+            "description": "Blog post title",
+            "maxLength": 200
+          },
+          "body": {
+            "type": "string",
+            "description": "Blog post content in Markdown format"
+          },
+          "metaDescription": {
+            "type": "string",
+            "description": "SEO meta description (recommended 150-160 characters)",
+            "maxLength": 300
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL slug for the blog post (auto-generated from title if not provided)"
+          },
+          "imageUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Featured image URL (max 10MB, optional)"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional tags for categorization"
+          },
+          "caption": {
+            "type": "string",
+            "description": "Social media caption for the blog post promotion (required - creates the associated social_post promo row)"
+          },
+          "shortFormCaption": {
+            "type": "string",
+            "description": "Short-form social caption (e.g. for stories, Twitter/X)"
+          },
+          "socialPlatforms": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Social platforms to target for the blog promo post (optional, defaults to [])"
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "generate_blog_post",
+      "description": "Generate a blog post using AI. Provide a topic and AI will write the full blog including title, content, and meta description. Returns 202 with statusUrl for polling progress.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "platforms",
+          "scheduledDate",
+          "topic"
+        ],
+        "properties": {
+          "platforms": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "wordpress",
+                "wix"
+              ]
+            },
+            "description": "Blog platforms to publish to",
+            "minItems": 1
+          },
+          "scheduledDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO datetime WITHOUT timezone suffix. Local time, server converts to UTC."
+          },
+          "topic": {
+            "type": "string",
+            "description": "What the blog post should be about - AI will generate title, content, and meta description"
+          },
+          "briefDetails": {
+            "type": "string",
+            "description": "Optional additional context, requirements, or specific points to cover"
+          },
+          "imageUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Optional featured image. If omitted, AI will find a relevant stock image."
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional tags"
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_blog_status",
+      "description": "Poll the generation status of a blog created with generate_blog_post. Use this to check progress until state becomes SCHEDULED.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "blogId"
+        ],
+        "properties": {
+          "blogId": {
+            "type": "number",
+            "description": "The blog ID (content_plan_item.id) returned from create_blog_post or generate_blog_post"
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_blog",
+      "description": "Get full details of a blog post including title, body, meta description, and scheduled date in client timezone. Use this after a blog is SCHEDULED to see the final content.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "blogId"
+        ],
+        "properties": {
+          "blogId": {
+            "type": "number",
+            "description": "The blog ID to retrieve"
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "update_blog",
+      "description": "Update an existing blog post. Only the fields you provide are changed - omitted fields keep their current values. Use this to fix a typo, update the body, change the meta description, slug, or toggle published status.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "blogId"
+        ],
+        "properties": {
+          "blogId": {
+            "type": "number",
+            "description": "The blog ID (content_plan_item.id) returned from create_blog_post or generate_blog_post"
+          },
+          "title": {
+            "type": "string",
+            "description": "New title for the blog post. Omit to keep the current title."
+          },
+          "body": {
+            "type": "string",
+            "description": "New body content (markdown). Omit to keep the current body."
+          },
+          "metaDescription": {
+            "type": "string",
+            "description": "New meta description. Omit to keep the current meta description."
+          },
+          "slug": {
+            "type": "string",
+            "description": "New URL slug. Omit to keep the current slug."
+          },
+          "published": {
+            "type": "boolean",
+            "description": "Published status. Omit to keep the current value."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "delete_blog",
+      "description": "Permanently delete an unpublished blog post and its associated content-plan item. This is unrecoverable - use only when the blog needs to be removed entirely. Refuses published blogs (those with published social posts); unpublish first or delete via the app.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "blogId"
+        ],
+        "properties": {
+          "blogId": {
+            "type": "number",
+            "description": "The blog ID (content_plan_item.id) returned from create_blog_post or generate_blog_post"
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "delete_item",
+      "description": "Permanently delete a content-plan item of ANY type (social post, carousel, or blog) and its associated rows. Unrecoverable. Refuses a published item (one already pushed to a platform); unpublish first or delete via the app.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "contentItemId"
+        ],
+        "properties": {
+          "contentItemId": {
+            "type": "number",
+            "description": "The content item ID (content_plan_item.id), the same identifier used by get_blog and get_post"
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "update_social_post",
+      "description": "Update the social post caption on an existing content item. Only the fields you provide are changed - omitted fields keep their current values. Works on both blog items (their promo social caption) and standalone social items.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "blogId"
+        ],
+        "properties": {
+          "blogId": {
+            "type": "number",
+            "description": "The content item ID (content_plan_item.id) - same identifier used by get_blog and get_post"
+          },
+          "caption": {
+            "type": "string",
+            "description": "New caption text. Omit to keep the current caption.",
+            "maxLength": 2200
+          },
+          "shortFormCaption": {
+            "type": "string",
+            "description": "New short-form caption (for X/Bluesky). Omit to keep the current value.",
+            "maxLength": 500
+          },
+          "targetPlatforms": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "New target platforms list. Omit to keep the current platforms."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "update_image",
+      "description": "Replace the image on an existing content item (blog or social post) with a new image from a public URL. For blog items, use the 'target' parameter to specify whether to replace the blog's main featured image ('blog', the default) or its promo social image ('social'). The old image is removed and the new one takes its place.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "blogId",
+          "imageUrl"
+        ],
+        "properties": {
+          "blogId": {
+            "type": "number",
+            "description": "The content item ID (content_plan_item.id) - same identifier used by get_blog and get_post"
+          },
+          "imageUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Public URL of the new image to import (max 10MB, must be publicly accessible)"
+          },
+          "target": {
+            "type": "string",
+            "enum": [
+              "blog",
+              "social"
+            ],
+            "description": "Which image to replace: the blog's main image ('blog') or its promo social image ('social'). Defaults to 'blog'. Ignored for social items."
+          },
+          "alt": {
+            "type": "string",
+            "description": "Optional alt text for the new image, for accessibility and SEO. Omit to leave the alt text unset."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "attach_video_asset",
+      "description": "Attach an already-uploaded, ready video to an existing content item (blog or social post), by copying it into a content image. The video must first be uploaded via POST /api/video-upload-url and be reported as 'ready' by its GET route -- a still-processing video is rejected. Replaces any existing image or video already on the content item.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "contentItemId",
+          "clientImageId"
+        ],
+        "properties": {
+          "contentItemId": {
+            "type": "number",
+            "description": "The content item ID (content_plan_item.id) -- same identifier used by get_blog and get_post"
+          },
+          "clientImageId": {
+            "type": "number",
+            "description": "The id returned by POST /api/video-upload-url as clientImageId. The video must already be 'ready' -- poll that same route's GET (?assetId=...) until it reports ready before calling this tool."
+          },
+          "title": {
+            "type": "string",
+            "description": "Optional title for the attached video. Omit to use the video's existing title."
+          },
+          "alt": {
+            "type": "string",
+            "description": "Optional alt text for the attached video. Omit to use the video's existing alt text."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "attach_image_asset",
+      "description": "Attach an image uploaded directly to Supabase Storage to an existing content item (blog or social post). Two-step contract: (1) POST /api/image-upload-url with { filename, fileSize, contentType } returns { clientImageId, uploadUrl, token, path }; (2) upload the raw image bytes with a plain HTTP PUT to uploadUrl -- the signed token is already embedded in the URL's query string, no Authorization header is needed, set Content-Type to the image's MIME type; then call this tool with the clientImageId. No processing wait: the image is attachable as soon as the PUT returns 200 (this tool verifies the bytes are in storage and rejects if not). For blog items, use 'target' to pick which image to replace: the blog's main featured image ('blog', the default) or its promo social image ('social'). The old targeted image is removed and the new one takes its place.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "contentItemId",
+          "clientImageId"
+        ],
+        "properties": {
+          "contentItemId": {
+            "type": "number",
+            "description": "The content item ID (content_plan_item.id) -- same identifier used by get_blog and get_post"
+          },
+          "clientImageId": {
+            "type": "number",
+            "description": "The id returned by POST /api/image-upload-url as clientImageId. The image bytes must already have been PUT to that response's uploadUrl."
+          },
+          "target": {
+            "type": "string",
+            "enum": [
+              "blog",
+              "social"
+            ],
+            "description": "Which image to replace: the blog's main image ('blog') or its promo social image ('social'). Defaults to 'blog'. Ignored for social items."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "reschedule_item",
+      "description": "Move a content item (blog, standalone social, or newsletter) to a new scheduled date. Only moves items that are not yet published (for example scheduled or pending); it will error on items that are already published, publishing, partially_published, or deleted. Cross-month moves are handled automatically -- the item is reassigned to the target month's content plan.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "contentItemId",
+          "scheduledDate"
+        ],
+        "properties": {
+          "contentItemId": {
+            "type": "number",
+            "description": "The content item ID (content_plan_item.id), the same identifier used by get_blog and get_post"
+          },
+          "scheduledDate": {
+            "type": "string",
+            "description": "New scheduled date, ISO date or datetime, e.g. \"2026-08-03\" or \"2026-08-03T10:00:00\". Date-only is accepted. Always interpreted as the client's local timezone; any trailing Z or UTC offset is IGNORED, so do not pass one expecting it to shift the time."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_onboarding_docs",
+      "description": "List all onboarding documents for the authenticated client. Returns action metadata and whether content has been added. Use this to see which onboarding documents exist and their completion status.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_onboarding_doc",
+      "description": "Get a specific onboarding document by referenceId, including the document content (markdown). Use this to read the current content and display to the user, also to understand what information may still be needed using the get_onboarding_prompt flow.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "referenceId"
+        ],
+        "properties": {
+          "referenceId": {
+            "type": "string",
+            "description": "The unique referenceId of the onboarding action (e.g., 'business-overview', 'target-audience')"
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "update_onboarding_doc",
+      "description": "Update the content of an onboarding document. Creates the document if it doesn't exist. Use this to save information gathered during onboarding conversations.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "referenceId",
+          "markdown"
+        ],
+        "properties": {
+          "referenceId": {
+            "type": "string",
+            "description": "The unique referenceId of the onboarding action"
+          },
+          "markdown": {
+            "type": "string",
+            "description": "The new markdown content for the document"
+          },
+          "title": {
+            "type": "string",
+            "description": "Optional title override for the document"
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_onboarding_prompt",
+      "description": "Get the AI prompt for an onboarding action, use this to help understand the data we expect to collect for our onboarding process. This prompt instructs the AI what data to collect and add to the document. Use this before starting an onboarding conversation to understand what information to gather.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "referenceId"
+        ],
+        "properties": {
+          "referenceId": {
+            "type": "string",
+            "description": "The unique referenceId of the onboarding action"
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "add_content_idea",
+      "description": "Capture a content idea for the current month; the content planner will use it. Appends the idea as a bullet to this month's Content Ideas document, creating the document if it does not yet exist.",
+      "inputSchema": {
+        "type": "object",
+        "required": [
+          "ideaText"
+        ],
+        "properties": {
+          "ideaText": {
+            "type": "string",
+            "description": "The content idea to capture (e.g. 'Behind-the-scenes of our product launch')"
+          },
+          "month": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12,
+            "description": "Month number (1 = January … 12 = December). Defaults to the current month."
+          },
+          "year": {
+            "type": "integer",
+            "minimum": 2020,
+            "maximum": 2100,
+            "description": "4-digit year (e.g. 2026). Defaults to the current year."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_content_ideas",
+      "description": "Return the Content Ideas document for the current (or specified) month. Useful for reviewing captured ideas before generating a content plan.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12,
+            "description": "Month number (1 = January … 12 = December). Defaults to the current month."
+          },
+          "year": {
+            "type": "integer",
+            "minimum": 2020,
+            "maximum": 2100,
+            "description": "4-digit year. Defaults to the current year."
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    }
+  ]
+}

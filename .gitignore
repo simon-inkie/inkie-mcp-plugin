@@ -1,0 +1,4 @@
+evals/results/
+.env
+.env.*
+*.local

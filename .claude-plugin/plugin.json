@@ -1,0 +1,14 @@
+{
+  "name": "inkie",
+  "version": "0.1.0",
+  "description": "Create and schedule small-business marketing content with Inkie.",
+  "author": {
+    "name": "Inkie",
+    "url": "https://inkie.ink"
+  },
+  "homepage": "https://app.inkie.ink/docs/mcp",
+  "mcpServers": "./.mcp.json",
+  "experimental": {
+    "evals": "evals"
+  }
+}
