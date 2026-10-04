@@ -46,7 +46,7 @@ Connect your Inkie account to Claude to read your brand information, draft capti
 
 Draft requests stay in the conversation. Create and generate requests schedule real content in Inkie, so include the channel, date and local time. Available channels depend on the publishing connections enabled in your account. Claude checks those connections before scheduling and reports whether generation is still processing or the item is scheduled.
 
-You bring your own Inkie account. The plugin signs in with OAuth in your browser, and no API key or credential is bundled. Claude's tools cannot upload files: to attach a local image, upload it in Inkie first, or use a public image URL.
+You bring your own Inkie account. The plugin signs in with OAuth in your browser, and no API key or credential is bundled. Inkie's MCP tools do not carry file bytes. Inkie's separate image and video upload endpoints accept that OAuth access token. Claude can upload a local file only with separate file and HTTP access and a securely available credential; otherwise upload it in Inkie first. Creating a social post from supplied copy requires a public image URL or 2 to 10 public carousel image URLs.
 
 ### Categories and audience
 
@@ -76,14 +76,14 @@ The bundle contains one marketing skill and one remote MCP server reference. It 
 | Brand context | Reads business, audience and voice documents; can save agreed updates while preserving existing facts |
 | Drafting | Writes captions in the conversation without creating scheduled items |
 | Planning | Reads monthly plans and ideas, suggests gaps, and saves individual ideas |
-| Social content | Creates scheduled posts from supplied copy or starts AI generation; checks enabled platforms first |
+| Social content | Creates scheduled posts from supplied copy and a public image URL or 2 to 10 carousel image URLs, or starts AI generation; checks enabled platforms first |
 | Blog content | Creates scheduled blogs from supplied Markdown or generates them from a topic; supports edits |
 | Progress | Polls generation status, retrieves completed content, and distinguishes scheduled from published |
 | Changes | Reads an item before editing or rescheduling; uses returned identifiers |
 | Media | Attaches uploaded image assets and ready video assets; supports replacing images from public URLs |
 | Deletion | Can permanently delete eligible unpublished content after explicit authorisation for the specific item |
 
-The skill covers `attach_image_asset`, which the public MCP documentation lists once the documentation update is deployed. Confirm the deployed page lists it, and live-check its upload guidance, before review.
+The skill covers `attach_image_asset` and the separate HTTP image/video upload flow. The app branch documents both and authorises those HTTP routes with OAuth access tokens. Confirm that version is deployed and verify the upload flow before review; repository checks do not establish deployment or live success.
 
 ## What it does not do
 
@@ -91,7 +91,7 @@ The skill covers `attach_image_asset`, which the public MCP documentation lists 
 - It does not create a complete monthly plan automatically; there is no create-plan tool.
 - It does not connect new social or blog publishing accounts. Users configure those in Inkie.
 - It does not switch businesses when a prompt names another one. Authentication determines the client.
-- It cannot upload files through MCP tools. Direct upload uses separate HTTP endpoints that need a signed-in app session or a Bearer JWT (an Inkie API key works) and HTTP access; otherwise the user uploads in Inkie.
+- Inkie's MCP tools do not carry file bytes. Direct image/video upload uses separate HTTP endpoints accepting an Inkie OAuth access token, an active Inkie API key as a Bearer token, or an app session. Claude.ai and Desktop's remote connector alone does not supply file upload or shell access. Claude Code can make the calls with file access, permitted HTTP/shell access and a securely available credential; connector sign-in does not automatically expose its token to the shell. Otherwise the user uploads in Inkie.
 - It does not create a text-only social post: Inkie requires an image URL or carousel for `create_social_post`.
 - It does not attach videos before processing is complete, or treat a local file path as a public image URL.
 - It does not guarantee that generation has completed or content has published. Tool status determines the report.
@@ -101,9 +101,9 @@ The skill covers `attach_image_asset`, which the public MCP documentation lists 
 
 Users bring their own Inkie account. The bundle's `.mcp.json` is the plain remote URL with no `Authorization` header and no environment placeholder, so Claude runs OAuth discovery itself and the user signs in through Inkie's browser consent page. No credential is bundled, and the bundle has no `userConfig` entries because it asks for none. [Inkie's MCP documentation](https://app.inkie.ink/docs/mcp) also describes API keys as a fallback for clients without browser sign-in; the bundle does not use them. A test-client key is used only by the eval wrapper `scripts/eval-live.sh`, in a private temporary copy.
 
-The sign-in resolves to the account's primary Inkie business. **NEEDED:** confirm the server's OAuth registration mode for Claude's directory client, consent scopes, that the protected-resource metadata (its `resource` value should match `https://app.inkie.ink/api/mcp`) is accepted by Claude, and that the flow works end to end in Claude.
+The sign-in resolves to the account's primary Inkie business. The app branch sets protected-resource metadata `resource` to `https://app.inkie.ink/api/mcp`, and advertises the app origin as the authorisation server with `/authorize`, `/token` and `/register` proxy endpoints. It advertises `openid`, `email`, `profile` and `claudeai` scopes. **NEEDED:** confirm deployment, the registration mode accepted for Claude's directory client, actual consent scopes and end-to-end discovery/sign-in in Claude.ai, Desktop and Code.
 
-**Reviewer account provision:** Simon must create or invite a reviewer to a dedicated, fully populated Inkie account and provide sign-in details and any verification steps through the portal's private test-account fields. No test account is included in the repository. Give the reviewer an Inkie login for this client so they can complete OAuth; there is nothing else to configure. If the portal asks for direct-upload checks, provide an app session or test-client API key privately for those HTTP calls only. An API key is not a substitute for testing OAuth.
+**Reviewer account provision:** Simon must create or invite a reviewer to a dedicated, fully populated Inkie account and provide sign-in details and any verification steps through the portal's private test-account fields. No test account is included in the repository. Give the reviewer an Inkie login for this client so they can complete OAuth; there is nothing else to configure. For direct-upload checks, use a securely available test-client OAuth access token, app session or active test-client API key for the separate HTTP calls. Do not assume Claude exposes its managed connector token for those calls; arrange a private credential path if needed. An API key is not a substitute for testing OAuth.
 
 Use the fictional client **Inkie Plugin Eval Test Client**, timezone **Europe/London**, with fictional business, audience and voice documents, a November 2099 plan, and test Instagram and WordPress destinations. Provide a scheduled unpublished social item, an unpublished blog with a promo, an uploaded image, a processed video and disposable items for deletion. Share their actual returned identifiers privately. Verify the sign-in resolves to this client; naming it in a prompt does not select it.
 
@@ -113,7 +113,7 @@ Use the fictional client **Inkie Plugin Eval Test Client**, timezone **Europe/Lo
 
 The plugin lets Claude read marketing information from the connected Inkie account and send requested changes back to Inkie. This can include business and brand documents, content ideas, captions, blog text, schedules and media references. These records may contain personal data if users put it in their content or documents. Tool results become available in the Claude conversation.
 
-The bundled connection sends OAuth-authenticated tool requests to Inkie's HTTPS MCP endpoint. Creating, generating, editing or scheduling content saves records or starts jobs in Inkie. At the scheduled time, Inkie can publish content through the account's connected channels. Media workflows can retrieve public image URLs or transfer bytes to the storage URL returned by Inkie. Direct upload uses separate HTTP calls that need app authentication.
+The bundled connection sends OAuth-authenticated tool requests to Inkie's HTTPS MCP endpoint. Creating, generating, editing or scheduling content saves records or starts jobs in Inkie. At the scheduled time, Inkie can publish content through the account's connected channels. Media workflows can retrieve public image URLs or transfer bytes to the storage URL returned by Inkie. Direct upload uses separate HTTP calls authorised by an Inkie OAuth access token, an active Inkie API key as a Bearer token, or a signed-in app session.
 
 The bundle contains instructions and configuration, with no separate plugin database or bundled telemetry service. This does not establish how Inkie's hosted service, its generation providers, media storage, or Claude retain and process data. Those details must be confirmed in the relevant policies.
 
@@ -209,10 +209,10 @@ Use returned identifiers and disposable fixtures, recording expected and actual 
 | List ideas after saving one | Requested idea appears in the chosen month |
 | Replace image using a public URL | Intended item and image target change; unrelated content remains |
 | Attach an uploaded image to a blog promo | Uses actual asset and item IDs and `target: social`; intended media is replaced |
-| Explain local image upload | Explains the Bearer or session requirement, notes MCP tools cannot upload, offers app upload; makes no invented upload call |
-| Direct image upload with authorised session or key, if provided | Authenticated POST returns signed URL, raw PUT succeeds, then attachment succeeds; no image polling. Also try the OAuth token if it can be obtained, as acceptance is unconfirmed |
+| Explain local image upload | Explains OAuth/API-key/session authentication, separate HTTP transfers and each Claude surface's access requirements; offers app upload when access is unavailable; invents no upload tool |
+| Direct image upload with a securely available test-client OAuth access token | OAuth-authenticated POST returns a signed URL, raw PUT succeeds without a Bearer header, then attachment succeeds; no image polling. Record the Claude surface and credential path. Separately check an active test-client API key or app session if provided |
 | Schedule a social post with no image | Asks for an image URL or offers generation; no text-only post is created |
-| Upload a video, poll with `uploadId`, attach with `clientImageId`; try an unready one | Ready asset attaches; unready asset is refused without claiming success |
+| Upload a video using a securely available test-client OAuth access token, poll with `uploadId`, attach with `clientImageId`; try an unready one | OAuth authorises both POST and GET; raw PUT uses the returned upload URL. Ready asset attaches; unready asset is refused without claiming success |
 | Delete disposable unpublished blog/item | Requires specific authorisation, removes the intended records; does not bypass published-item refusal |
 
 If the server exposes a tool to alter a blog's published status, test it only on a disposable test destination after separate explicit authorisation. Schedule dates alone do not make that operation harmless.

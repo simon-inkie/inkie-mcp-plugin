@@ -63,7 +63,15 @@ Replace the sample business details and dates with your own. Create and generate
 
 ## Media and limits
 
-You can attach an existing Inkie image asset or a video that has finished processing, or use a publicly hosted image. Scheduling a social post needs an image: give a public image URL, or ask Inkie to generate the post. Claude's tools cannot upload files. Direct upload of a local file uses separate Inkie HTTP endpoints that accept a signed-in app session or an Inkie API key as a Bearer token, and Claude needs HTTP or shell access to call them. If that is not available, upload the file in Inkie first.
+You can attach an existing Inkie image asset or a video that has finished processing, or use a publicly hosted image. Scheduling a social post needs an image: give a public image URL, or ask Inkie to generate the post. Inkie's MCP tools do not carry file bytes. Inkie's separate image and video upload HTTP endpoints accept the Inkie OAuth access token used for MCP, an active Inkie API key as a Bearer token, or a signed-in app session. Direct upload also needs access to the file, HTTP or shell capability, and a securely available credential; signing in to the connector does not by itself provide those capabilities. If that access is unavailable, upload the file in Inkie first.
+
+| Claude surface | Local file upload |
+| --- | --- |
+| Claude.ai | The Inkie remote connector supplies MCP tools, with no file-byte upload tool. Upload in Inkie first unless a separate authorised capability can access the file, make the HTTP calls and use a securely available credential. |
+| Claude Desktop | The remote connector has the same limit as Claude.ai. Desktop alone does not give this connector local file or shell access; a separately configured capability would need file access, HTTP access and a securely available credential. |
+| Claude Code | Can use its shell to upload a readable local file when network access and permissions allow and a credential is securely available. Do not assume the MCP-managed OAuth token is automatically available to shell commands. |
+
+See [Inkie's upload steps](https://app.inkie.ink/docs/mcp) and [Anthropic's remote connector guidance](https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp). The app docs describe the HTTP contract, not an automatic upload capability on each Claude surface.
 
 The plugin cannot connect new publishing channels, switch businesses by name, or automatically create a whole monthly content plan. Permanent deletion requires explicit authorisation for the specific item; Inkie refuses to delete items it knows are published, but Claude checks the item's state first rather than relying on that.
 

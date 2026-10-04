@@ -47,10 +47,10 @@ Every case runs with mocks by default. The `mock_calls` read-only guards only se
 | `reschedule-item` | Discover an item and move it across months | Mock only | None in supported live run |
 | `edit-caption` | Edit caption using the required `blogId` argument | Mock only | None in supported live run |
 | `attach-uploaded-image` | Attach a successful uploaded image to a blog promo | Mock only | None in supported live run |
-| `explain-image-upload` | Explain Bearer or session-authenticated POST, raw PUT and attachment | Offline explanation | No upload, attachment or network calls requested |
+| `explain-image-upload` | Explain OAuth/API-key/session-authenticated POST, raw PUT, attachment and Claude surface requirements | Offline explanation | No upload, attachment or network calls requested |
 | `update-business-overview` | Preserve and update an onboarding document | Mock only | None in supported live run |
 
-Mock-only mutations use fake identifiers and should not be run with `--mocks off`. The image attachment case checks numeric asset/item IDs and `target: social`; the explanation case checks the complete image upload contract and authentication limitation. It does not simulate HTTP transfers or prove uploaded bytes exist. The upload endpoint accepts a signed-in app session or a Bearer JWT, and an Inkie API key works as that Bearer token. Whether an OAuth token is accepted there is unconfirmed, and Claude's MCP tools cannot upload bytes. No real upload case is enabled.
+Mock-only mutations use fake identifiers and should not be run with `--mocks off`. The image attachment case checks numeric asset/item IDs and `target: social`; the explanation case checks the complete image upload contract, OAuth/API-key/session authentication and the requirements for each Claude surface. It does not simulate HTTP transfers or prove uploaded bytes exist. Both upload endpoints accept an Inkie OAuth access token or active Inkie API key as a Bearer token, or a signed-in app session. Inkie's MCP tools do not carry file bytes. Direct upload needs separate file and HTTP access and a securely available credential; connector sign-in alone does not establish those capabilities. No real upload case is enabled.
 
 ## Live test-account run (eval-only API key)
 
