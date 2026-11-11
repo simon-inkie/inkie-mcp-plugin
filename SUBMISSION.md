@@ -44,7 +44,9 @@ Inkie is a marketing platform for small businesses. It brings together your busi
 
 Connect your Inkie account to Claude to read your brand information, draft captions, review a monthly content plan and save ideas. When you want to create content, Claude can send your finished copy to Inkie or ask Inkie to generate social posts and blogs. It can also edit existing content, move unpublished items to another date, and attach uploaded images or ready videos.
 
-Draft requests stay in the conversation. Create and generate requests schedule real content in Inkie, so include the channel, date and local time. Available channels depend on the publishing connections enabled in your account. Claude checks those connections before scheduling and reports whether generation is still processing or the item is scheduled.
+For these content workflows, Inkie selects stock images or uses images you supply. It does not generate images with AI.
+
+Draft requests stay in the conversation. Create and generate requests add real content to Inkie, which waits for your approval in the app before it publishes, so include the channel, date and local time. Available channels depend on the publishing connections enabled in your account. Claude checks those connections before scheduling and reports whether generation is still processing or the item is scheduled.
 
 You bring your own Inkie account. The plugin signs in with OAuth in your browser, and no API key or credential is bundled. Inkie's MCP tools do not carry file bytes. Inkie's separate image and video upload endpoints accept that OAuth access token. Claude can upload a local file only with separate file and HTTP access and a securely available credential; otherwise upload it in Inkie first. Creating a social post from supplied copy requires a public image URL or 2 to 10 public carousel image URLs.
 
@@ -76,11 +78,11 @@ The bundle contains one marketing skill and one remote MCP server reference. It 
 | Brand context | Reads business, audience and voice documents; can save agreed updates while preserving existing facts |
 | Drafting | Writes captions in the conversation without creating scheduled items |
 | Planning | Reads monthly plans and ideas, suggests gaps, and saves individual ideas |
-| Social content | Creates scheduled posts from supplied copy and a public image URL or 2 to 10 carousel image URLs, or starts AI generation; checks enabled platforms first |
+| Social content | Creates scheduled posts from supplied copy and a public image URL or 2 to 10 carousel image URLs, or generates captions and selects a stock image; checks enabled platforms first |
 | Blog content | Creates scheduled blogs from supplied Markdown or generates them from a topic; supports edits |
 | Progress | Polls generation status, retrieves completed content, and distinguishes scheduled from published |
 | Changes | Reads an item before editing or rescheduling; uses returned identifiers |
-| Media | Attaches uploaded image assets and ready video assets; supports replacing images from public URLs |
+| Media | Selects stock or user-supplied images without AI image generation; attaches uploaded images and ready video assets, and replaces images from public URLs |
 | Deletion | Can permanently delete eligible unpublished content after explicit authorisation for the specific item |
 
 The skill covers `attach_image_asset` and the separate HTTP image/video upload flow. The app branch documents both and authorises those HTTP routes with OAuth access tokens. Confirm that version is deployed and verify the upload flow before review; repository checks do not establish deployment or live success.

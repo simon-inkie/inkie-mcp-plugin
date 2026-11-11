@@ -9,4 +9,4 @@ allowed_tools: ["Read", "Glob", "Grep", "Skill"]
 runs: 3
 ---
 
-The connected client is the fictional Inkie Plugin Eval Test Client, a small workshop business. This is a test-client write: use only this dedicated test client, never another client. Save this idea for November 2099: "Inkie eval: Show a beginner repair workshop behind the scenes." Do not create any scheduled posts.
+The connected client is the connected test client, which is used only for testing and is connected to test channels. Its business documents may describe an unrelated business; that is expected. This is a test-client write: use only this dedicated test client, never another client. Save this idea for November 2099: "Inkie eval: Show a beginner repair workshop behind the scenes." Do not create any scheduled posts.
