@@ -14,7 +14,7 @@ This Claude plugin connects to your Inkie account and adds a marketing skill. As
 - Generate social posts and blogs, or schedule copy you have already written.
 - Edit captions and blogs, move unpublished content to another date, and attach uploaded images or ready videos.
 
-Drafting in the conversation does not save or schedule a post. Inkie's create and generate tools schedule real content. When you ask to schedule, give the channel, date and local time. Available channels depend on your Inkie account's connections; Claude checks them before scheduling. Scheduled content is not necessarily published yet.
+Drafting in the conversation does not save or schedule a post. Inkie's create and generate tools add real content to Inkie, which waits for your approval in the app before it publishes. When you ask to schedule, give the channel, date and local time. Available channels depend on your Inkie account's connections; Claude checks them before scheduling. Scheduled content is not necessarily published yet.
 
 ## Install
 

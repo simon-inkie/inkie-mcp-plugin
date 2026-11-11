@@ -10,5 +10,6 @@
   "mcpServers": "./.mcp.json",
   "experimental": {
     "evals": "evals"
-  }
+  },
+  "privacyPolicyUrl": "https://www.inkie.ink/privacy-policy"
 }
