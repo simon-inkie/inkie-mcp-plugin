@@ -101,7 +101,7 @@ The skill covers `attach_image_asset` and the separate HTTP image/video upload f
 
 ## Authentication and reviewer access
 
-Users bring their own Inkie account. The bundle's `.mcp.json` is the plain remote URL with no `Authorization` header and no environment placeholder, so Claude runs OAuth discovery itself and the user signs in through Inkie's browser consent page. No credential is bundled, and the bundle has no `userConfig` entries because it asks for none. [Inkie's MCP documentation](https://app.inkie.ink/docs/mcp) also describes API keys as a fallback for clients without browser sign-in; the bundle does not use them. A test-client key is used only by the eval wrapper `scripts/eval-live.sh`, in a private temporary copy.
+Users bring their own Inkie account. The bundle's `.mcp.json` is the plain remote URL with no `Authorization` header and no environment placeholder, so Claude runs OAuth discovery itself and the user signs in through Inkie's browser consent page. No credential is bundled, and the bundle has no `userConfig` entries because it asks for none. [Inkie's MCP documentation](https://app.inkie.ink/docs/mcp) also describes API keys as a fallback for clients without browser sign-in; the bundle does not use them.
 
 The sign-in resolves to the account's primary Inkie business. The app branch sets protected-resource metadata `resource` to `https://app.inkie.ink/api/mcp`, and advertises the app origin as the authorisation server with `/authorize`, `/token` and `/register` proxy endpoints. It advertises `openid`, `email`, `profile` and `claudeai` scopes. **NEEDED:** confirm deployment, the registration mode accepted for Claude's directory client, actual consent scopes and end-to-end discovery/sign-in in Claude.ai, Desktop and Code.
 
@@ -183,18 +183,9 @@ Mock coverage includes brand reads, draft-only behaviour, plan reads, scheduling
 
 Connect the server as a custom connector in Claude and sign in using the private reviewer account. Confirm tools load and the returned brand information belongs to the test client. Record consent and registration behaviour. Then load the bundle with `claude --plugin-dir .`, authenticate through `/mcp`, and repeat the check. Confirm an unauthenticated client gets a 401 with a `WWW-Authenticate` header and sees no account content. Do not probe real customer accounts.
 
-### 4. Run the supported live eval subset
+### 4. Live checks
 
-This eval-only path needs a test-client API key, because non-interactive runs cannot complete a browser sign-in. Only after verifying the key's client and test publishing destinations, enter the key without echoing and run:
-
-```bash
-read -r -s -p 'Test-client Inkie API key: ' INKIE_MCP_API_KEY
-printf '\n'
-export INKIE_MCP_API_KEY
-bash scripts/eval-live.sh --runs 1
-```
-
-The wrapper supplies the eval-specific environment variable needed by isolated runs. The six live cases read brand/plan data, schedule supplied social copy, generate social and blog content, and append an idea. They create real records and jobs in November 2099. Repeated runs create duplicates. No automatic cleanup occurs. Read [EVALS.md](EVALS.md) before running; never run the mock-only mutation cases against the real server's fake fixture identifiers.
+Live runs against a real account are done by hand with the private reviewer account (see steps 3 and 5). No credential-bearing script is shipped in this repository.
 
 ### 5. Manually exercise the remaining live tools
 

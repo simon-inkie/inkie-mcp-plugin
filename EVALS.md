@@ -52,39 +52,6 @@ Every case runs with mocks by default. The `mock_calls` read-only guards only se
 
 Mock-only mutations use fake identifiers and should not be run with `--mocks off`. The image attachment case checks numeric asset/item IDs and `target: social`; the explanation case checks the complete image upload contract, OAuth/API-key/session authentication and the requirements for each Claude surface. It does not simulate HTTP transfers or prove uploaded bytes exist. Both upload endpoints accept an Inkie OAuth access token or active Inkie API key as a Bearer token, or a signed-in app session. Inkie's MCP tools do not carry file bytes. Direct upload needs separate file and HTTP access and a securely available credential; connector sign-in alone does not establish those capabilities. No real upload case is enabled.
 
-## Live test-account run (eval-only API key)
-
-The shipped plugin uses OAuth and carries no credential. Non-interactive eval runs cannot complete a browser sign-in, so this wrapper is a separate, eval-only path that supplies a test-client API key. The key is never written to `.mcp.json` and must not be added there.
-
-Prepare a dedicated client named **Inkie Plugin Eval Test Client**, with fictional business overview and target-audience documents, client timezone **Europe/London**, and test Instagram and WordPress connections. Ensure the tools actually discover these platforms. Review the November 2099 plan if you want non-empty plan-read coverage. Scheduled dates are in 2099 to avoid imminent publication, but the run creates actual records and generation jobs. Use test publishing destinations only. Repeated runs create duplicates and append repeated ideas; inspect and clean up in the app afterwards. There is no automatic deletion.
-
-Get the key from this client's Settings → API keys and enter it without echoing:
-
-```bash
-read -r -s -p 'Test-client Inkie API key: ' INKIE_MCP_API_KEY
-printf '\n'
-export INKIE_MCP_API_KEY
-bash scripts/eval-live.sh --runs 1
-```
-
-This is the supported exact test-key command. The wrapper runs:
-
-```bash
-claude plugin eval "$eval_plugin_dir" \
-  --mocks off \
-  --ablation with-without \
-  --no-publish \
-  --no-scaffold \
-  --output-dir "$plugin_root/evals/results/live-$(date -u +%Y%m%dT%H%M%SZ)" \
-  --runs 1 \
-  --tag live \
-  --allow-tools 'mcp__plugin_inkie_inkie__*'
-```
-
-The wrapper's `eval_plugin_dir` is a temporary copy of the authored plugin components, removed on exit. Its `plugin_root` is this plugin's directory. The wrapper exports `EVAL_INKIE_MCP_API_KEY` from `INKIE_MCP_API_KEY` and adds an `Authorization: Bearer ${EVAL_INKIE_MCP_API_KEY}` header to the temporary copy's `.mcp.json` only, so the key value itself is never written to a file. Eval children inherit `EVAL_*` but strip ordinary custom variables, so the alias is needed. The shipped plugin configuration remains unchanged and OAuth-only.
-
-Required environment: `INKIE_MCP_API_KEY` (eval wrapper only) for the live run, plus normal Claude authentication or your normal model-provider variables (for example `ANTHROPIC_API_KEY` when using that provider). The wrapper creates the `EVAL_*` alias; never put either key value in case frontmatter. It does not verify which client owns the key, so check that in Inkie before running. The first eval run may ask whether you trust this plugin; `--trust-plugin` can be added only after reviewing the files. The real server runs as you, and the MCP grant applies across the selected cases.
-
 ## Safe validation performed
 
 Manifest validation and static file checks do not require a key or model calls. The CLI help offers no dry-run option. `--mocks record` is a behavioural model run, not an offline validator. No behavioural eval, real MCP request or upload was run during packaging. Run validation separately with:
