@@ -2,10 +2,7 @@
   "mcpServers": {
     "inkie": {
       "type": "http",
-      "url": "https://app.inkie.ink/api/mcp",
-      "headers": {
-        "Authorization": "Bearer ${INKIE_MCP_API_KEY}"
-      }
+      "url": "https://app.inkie.ink/api/mcp"
     }
   }
 }

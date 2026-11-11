@@ -2,12 +2,14 @@
   "tools": [
     {
       "name": "get_platforms",
+      "title": "Get Platforms",
       "description": "Get available social and blog platforms for the authenticated client. Returns both enabled platforms (currently active) and all connected platforms (including temporarily disabled ones). You can post to any platform in the 'all' list.",
       "inputSchema": {
         "type": "object",
         "properties": {}
       },
       "annotations": {
+        "title": "Get Platforms",
         "readOnlyHint": true,
         "destructiveHint": false,
         "idempotentHint": true,
@@ -16,7 +18,8 @@
     },
     {
       "name": "create_social_post",
-      "description": "Create a fully-formed social post from complete data. All fields are required. Returns immediately with SCHEDULED status. Use this when you have the complete caption, image, and other details ready. Provide 2-10 imageUrls to publish as a carousel.",
+      "title": "Create Social Post",
+      "description": "Create a fully-formed social post from complete data. All fields are required, including an image: provide EXACTLY ONE of imageUrl (single image) or imageUrls (2-10 images, carousel). Posts with neither are rejected, so text-only posts are not supported. If you have no image, ask the user for one or use generate_social_post. Returns immediately with SCHEDULED status. Use this when you have the complete caption, image, and other details ready.",
       "inputSchema": {
         "type": "object",
         "required": [
@@ -57,7 +60,7 @@
           "imageUrl": {
             "type": "string",
             "format": "uri",
-            "description": "External image URL to import (max 10MB, must be publicly accessible). Provide EITHER imageUrl (single image) OR imageUrls (carousel), not both."
+            "description": "REQUIRED unless imageUrls is given. External image URL to import (max 10MB, must be publicly accessible). Provide EITHER imageUrl (single image) OR imageUrls (carousel), not both and not neither."
           },
           "imageUrls": {
             "type": "array",
@@ -67,7 +70,7 @@
             },
             "minItems": 2,
             "maxItems": 10,
-            "description": "2-10 image URLs to publish as a carousel. Provide EITHER imageUrl (single) OR imageUrls (carousel), not both."
+            "description": "REQUIRED unless imageUrl is given. 2-10 image URLs to publish as a carousel. Provide EITHER imageUrl (single) OR imageUrls (carousel), not both and not neither."
           },
           "tags": {
             "type": "array",
@@ -97,6 +100,7 @@
         }
       },
       "annotations": {
+        "title": "Create Social Post",
         "readOnlyHint": false,
         "destructiveHint": false,
         "idempotentHint": false,
@@ -105,6 +109,7 @@
     },
     {
       "name": "generate_social_post",
+      "title": "Generate Social Post",
       "description": "Generate a social post using AI. Provide a captionIdea and AI will generate captions and optionally find an image. Returns 202 with statusUrl for polling progress. Use this when you want AI to help create the content. Provide 2-10 imageUrls to generate a carousel post with your own images.",
       "inputSchema": {
         "type": "object",
@@ -176,6 +181,7 @@
         }
       },
       "annotations": {
+        "title": "Generate Social Post",
         "readOnlyHint": false,
         "destructiveHint": false,
         "idempotentHint": false,
@@ -184,6 +190,7 @@
     },
     {
       "name": "get_post_status",
+      "title": "Get Post Status",
       "description": "Poll the generation status of a post created with generate_social_post. Use this to check progress until state becomes SCHEDULED.",
       "inputSchema": {
         "type": "object",
@@ -198,6 +205,7 @@
         }
       },
       "annotations": {
+        "title": "Get Post Status",
         "readOnlyHint": true,
         "destructiveHint": false,
         "idempotentHint": true,
@@ -206,6 +214,7 @@
     },
     {
       "name": "get_post",
+      "title": "Get Social Post",
       "description": "Get full details of a post including caption, shortFormCaption, scheduled date in client timezone, and images. The response includes an images[] array (ordered; cover = first) and a back-compat image field (the cover image). Use this after a post is SCHEDULED to see the final content.",
       "inputSchema": {
         "type": "object",
@@ -220,6 +229,7 @@
         }
       },
       "annotations": {
+        "title": "Get Social Post",
         "readOnlyHint": true,
         "destructiveHint": false,
         "idempotentHint": true,
@@ -228,7 +238,8 @@
     },
     {
       "name": "get_content_plan",
-      "description": "Get the content plan and all scheduled items for a given month. Use this to see what content is already scheduled before creating new posts. Returns plan metadata, all items (social posts and blogs), and a summary.",
+      "title": "Get Content Plan",
+      "description": "Get the content plan and all scheduled items for a given month. Use this to see what content is already scheduled before creating new posts. Returns plan metadata, all items (social posts and blogs), and a summary. The summary separates healthy 'scheduled' items from 'overdue' ones (scheduled date has passed but they were never published) and 'needsAttention' ones (blocked or only partially published).",
       "inputSchema": {
         "type": "object",
         "required": [
@@ -243,6 +254,7 @@
         }
       },
       "annotations": {
+        "title": "Get Content Plan",
         "readOnlyHint": true,
         "destructiveHint": false,
         "idempotentHint": true,
@@ -251,6 +263,7 @@
     },
     {
       "name": "create_blog_post",
+      "title": "Create Blog Post",
       "description": "Create a fully-formed blog post from complete data. Title, body, caption, and shortFormCaption are required. Creates the blog and its associated social_post promo row in one call. Returns immediately with SCHEDULED status. Use this when you have the complete blog content ready.",
       "inputSchema": {
         "type": "object",
@@ -312,7 +325,7 @@
           },
           "caption": {
             "type": "string",
-            "description": "Social media caption for the blog post promotion (required - creates the associated social_post promo row)"
+            "description": "Social media caption for the blog post promotion (required; creates the associated social_post promo row)"
           },
           "shortFormCaption": {
             "type": "string",
@@ -328,6 +341,7 @@
         }
       },
       "annotations": {
+        "title": "Create Blog Post",
         "readOnlyHint": false,
         "destructiveHint": false,
         "idempotentHint": false,
@@ -336,6 +350,7 @@
     },
     {
       "name": "generate_blog_post",
+      "title": "Generate Blog Post",
       "description": "Generate a blog post using AI. Provide a topic and AI will write the full blog including title, content, and meta description. Returns 202 with statusUrl for polling progress.",
       "inputSchema": {
         "type": "object",
@@ -385,6 +400,7 @@
         }
       },
       "annotations": {
+        "title": "Generate Blog Post",
         "readOnlyHint": false,
         "destructiveHint": false,
         "idempotentHint": false,
@@ -393,6 +409,7 @@
     },
     {
       "name": "get_blog_status",
+      "title": "Get Blog Status",
       "description": "Poll the generation status of a blog created with generate_blog_post. Use this to check progress until state becomes SCHEDULED.",
       "inputSchema": {
         "type": "object",
@@ -407,6 +424,7 @@
         }
       },
       "annotations": {
+        "title": "Get Blog Status",
         "readOnlyHint": true,
         "destructiveHint": false,
         "idempotentHint": true,
@@ -415,6 +433,7 @@
     },
     {
       "name": "get_blog",
+      "title": "Get Blog Post",
       "description": "Get full details of a blog post including title, body, meta description, and scheduled date in client timezone. Use this after a blog is SCHEDULED to see the final content.",
       "inputSchema": {
         "type": "object",
@@ -429,6 +448,7 @@
         }
       },
       "annotations": {
+        "title": "Get Blog Post",
         "readOnlyHint": true,
         "destructiveHint": false,
         "idempotentHint": true,
@@ -437,7 +457,8 @@
     },
     {
       "name": "update_blog",
-      "description": "Update an existing blog post. Only the fields you provide are changed - omitted fields keep their current values. Use this to fix a typo, update the body, change the meta description, slug, or toggle published status.",
+      "title": "Update Blog Post",
+      "description": "Update an existing blog post. Only the fields you provide are changed; omitted fields keep their current values. Use this to fix a typo, update the body, change the meta description, slug, or toggle published status.",
       "inputSchema": {
         "type": "object",
         "required": [
@@ -471,15 +492,17 @@
         }
       },
       "annotations": {
+        "title": "Update Blog Post",
         "readOnlyHint": false,
-        "destructiveHint": false,
+        "destructiveHint": true,
         "idempotentHint": true,
         "openWorldHint": false
       }
     },
     {
       "name": "delete_blog",
-      "description": "Permanently delete an unpublished blog post and its associated content-plan item. This is unrecoverable - use only when the blog needs to be removed entirely. Refuses published blogs (those with published social posts); unpublish first or delete via the app.",
+      "title": "Delete Blog Post",
+      "description": "Permanently delete an unpublished blog post and its associated content-plan item. This is unrecoverable; use only when the blog needs to be removed entirely. Refuses published blogs (those with published social posts); unpublish first or delete via the app.",
       "inputSchema": {
         "type": "object",
         "required": [
@@ -493,6 +516,7 @@
         }
       },
       "annotations": {
+        "title": "Delete Blog Post",
         "readOnlyHint": false,
         "destructiveHint": true,
         "idempotentHint": false,
@@ -501,6 +525,7 @@
     },
     {
       "name": "delete_item",
+      "title": "Delete Content Item",
       "description": "Permanently delete a content-plan item of ANY type (social post, carousel, or blog) and its associated rows. Unrecoverable. Refuses a published item (one already pushed to a platform); unpublish first or delete via the app.",
       "inputSchema": {
         "type": "object",
@@ -515,6 +540,7 @@
         }
       },
       "annotations": {
+        "title": "Delete Content Item",
         "readOnlyHint": false,
         "destructiveHint": true,
         "idempotentHint": false,
@@ -523,7 +549,8 @@
     },
     {
       "name": "update_social_post",
-      "description": "Update the social post caption on an existing content item. Only the fields you provide are changed - omitted fields keep their current values. Works on both blog items (their promo social caption) and standalone social items.",
+      "title": "Update Social Post",
+      "description": "Update the social post caption on an existing content item. Only the fields you provide are changed; omitted fields keep their current values. Works on both blog items (their promo social caption) and standalone social items.",
       "inputSchema": {
         "type": "object",
         "required": [
@@ -532,7 +559,7 @@
         "properties": {
           "blogId": {
             "type": "number",
-            "description": "The content item ID (content_plan_item.id) - same identifier used by get_blog and get_post"
+            "description": "The content item ID (content_plan_item.id); same identifier used by get_blog and get_post"
           },
           "caption": {
             "type": "string",
@@ -554,14 +581,16 @@
         }
       },
       "annotations": {
+        "title": "Update Social Post",
         "readOnlyHint": false,
-        "destructiveHint": false,
+        "destructiveHint": true,
         "idempotentHint": true,
         "openWorldHint": false
       }
     },
     {
       "name": "update_image",
+      "title": "Replace Item Image from URL",
       "description": "Replace the image on an existing content item (blog or social post) with a new image from a public URL. For blog items, use the 'target' parameter to specify whether to replace the blog's main featured image ('blog', the default) or its promo social image ('social'). The old image is removed and the new one takes its place.",
       "inputSchema": {
         "type": "object",
@@ -572,7 +601,7 @@
         "properties": {
           "blogId": {
             "type": "number",
-            "description": "The content item ID (content_plan_item.id) - same identifier used by get_blog and get_post"
+            "description": "The content item ID (content_plan_item.id); same identifier used by get_blog and get_post"
           },
           "imageUrl": {
             "type": "string",
@@ -594,14 +623,16 @@
         }
       },
       "annotations": {
+        "title": "Replace Item Image from URL",
         "readOnlyHint": false,
-        "destructiveHint": false,
+        "destructiveHint": true,
         "idempotentHint": false,
         "openWorldHint": false
       }
     },
     {
       "name": "attach_video_asset",
+      "title": "Attach Video",
       "description": "Attach an already-uploaded, ready video to an existing content item (blog or social post), by copying it into a content image. The video must first be uploaded via POST /api/video-upload-url and be reported as 'ready' by its GET route -- a still-processing video is rejected. Replaces any existing image or video already on the content item.",
       "inputSchema": {
         "type": "object",
@@ -629,14 +660,16 @@
         }
       },
       "annotations": {
+        "title": "Attach Video",
         "readOnlyHint": false,
-        "destructiveHint": false,
+        "destructiveHint": true,
         "idempotentHint": true,
         "openWorldHint": false
       }
     },
     {
       "name": "attach_image_asset",
+      "title": "Attach Image",
       "description": "Attach an image uploaded directly to Supabase Storage to an existing content item (blog or social post). Two-step contract: (1) POST /api/image-upload-url with { filename, fileSize, contentType } returns { clientImageId, uploadUrl, token, path }; (2) upload the raw image bytes with a plain HTTP PUT to uploadUrl -- the signed token is already embedded in the URL's query string, no Authorization header is needed, set Content-Type to the image's MIME type; then call this tool with the clientImageId. No processing wait: the image is attachable as soon as the PUT returns 200 (this tool verifies the bytes are in storage and rejects if not). For blog items, use 'target' to pick which image to replace: the blog's main featured image ('blog', the default) or its promo social image ('social'). The old targeted image is removed and the new one takes its place.",
       "inputSchema": {
         "type": "object",
@@ -664,14 +697,16 @@
         }
       },
       "annotations": {
+        "title": "Attach Image",
         "readOnlyHint": false,
-        "destructiveHint": false,
+        "destructiveHint": true,
         "idempotentHint": false,
         "openWorldHint": false
       }
     },
     {
       "name": "reschedule_item",
+      "title": "Reschedule Content Item",
       "description": "Move a content item (blog, standalone social, or newsletter) to a new scheduled date. Only moves items that are not yet published (for example scheduled or pending); it will error on items that are already published, publishing, partially_published, or deleted. Cross-month moves are handled automatically -- the item is reassigned to the target month's content plan.",
       "inputSchema": {
         "type": "object",
@@ -691,6 +726,7 @@
         }
       },
       "annotations": {
+        "title": "Reschedule Content Item",
         "readOnlyHint": false,
         "destructiveHint": false,
         "idempotentHint": true,
@@ -699,12 +735,14 @@
     },
     {
       "name": "list_onboarding_docs",
+      "title": "List Onboarding Documents",
       "description": "List all onboarding documents for the authenticated client. Returns action metadata and whether content has been added. Use this to see which onboarding documents exist and their completion status.",
       "inputSchema": {
         "type": "object",
         "properties": {}
       },
       "annotations": {
+        "title": "List Onboarding Documents",
         "readOnlyHint": true,
         "destructiveHint": false,
         "idempotentHint": true,
@@ -713,6 +751,7 @@
     },
     {
       "name": "get_onboarding_doc",
+      "title": "Get Onboarding Document",
       "description": "Get a specific onboarding document by referenceId, including the document content (markdown). Use this to read the current content and display to the user, also to understand what information may still be needed using the get_onboarding_prompt flow.",
       "inputSchema": {
         "type": "object",
@@ -727,6 +766,7 @@
         }
       },
       "annotations": {
+        "title": "Get Onboarding Document",
         "readOnlyHint": true,
         "destructiveHint": false,
         "idempotentHint": true,
@@ -735,6 +775,7 @@
     },
     {
       "name": "update_onboarding_doc",
+      "title": "Update Onboarding Document",
       "description": "Update the content of an onboarding document. Creates the document if it doesn't exist. Use this to save information gathered during onboarding conversations.",
       "inputSchema": {
         "type": "object",
@@ -758,6 +799,7 @@
         }
       },
       "annotations": {
+        "title": "Update Onboarding Document",
         "readOnlyHint": false,
         "destructiveHint": true,
         "idempotentHint": true,
@@ -766,6 +808,7 @@
     },
     {
       "name": "get_onboarding_prompt",
+      "title": "Get Onboarding Prompt",
       "description": "Get the AI prompt for an onboarding action, use this to help understand the data we expect to collect for our onboarding process. This prompt instructs the AI what data to collect and add to the document. Use this before starting an onboarding conversation to understand what information to gather.",
       "inputSchema": {
         "type": "object",
@@ -780,6 +823,7 @@
         }
       },
       "annotations": {
+        "title": "Get Onboarding Prompt",
         "readOnlyHint": true,
         "destructiveHint": false,
         "idempotentHint": true,
@@ -788,6 +832,7 @@
     },
     {
       "name": "add_content_idea",
+      "title": "Add Content Idea",
       "description": "Capture a content idea for the current month; the content planner will use it. Appends the idea as a bullet to this month's Content Ideas document, creating the document if it does not yet exist.",
       "inputSchema": {
         "type": "object",
@@ -814,6 +859,7 @@
         }
       },
       "annotations": {
+        "title": "Add Content Idea",
         "readOnlyHint": false,
         "destructiveHint": false,
         "idempotentHint": false,
@@ -822,6 +868,7 @@
     },
     {
       "name": "list_content_ideas",
+      "title": "List Content Ideas",
       "description": "Return the Content Ideas document for the current (or specified) month. Useful for reviewing captured ideas before generating a content plan.",
       "inputSchema": {
         "type": "object",
@@ -841,6 +888,7 @@
         }
       },
       "annotations": {
+        "title": "List Content Ideas",
         "readOnlyHint": true,
         "destructiveHint": false,
         "idempotentHint": true,
