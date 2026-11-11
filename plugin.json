@@ -1,0 +1,93 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "inkie",
+  "version": "0.1.0",
+  "description": "Create and schedule small-business marketing content with Inkie.",
+  "author": {
+    "name": "Inkie",
+    "url": "https://inkie.ink"
+  },
+  "license": "Apache-2.0",
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Inkie",
+        "shortDescription": "Plan and create marketing",
+        "longDescription": "Connect your Inkie account to read brand information, draft captions, review content plans and save ideas. Create or generate social posts and blogs, edit existing content, reschedule unpublished items and attach uploaded media. Content created or generated through the connection needs approval in Inkie before publishing. Available destinations depend on your connected channels. Requires an Inkie subscription, with a 14-day free trial. Subscription checkout takes place inside the Inkie app.",
+        "developerName": "Inkie",
+        "category": "Business & Operations",
+        "defaultPrompt": [
+          "Read my brand information and draft a social caption without saving it.",
+          "Review next month's content plan and suggest three gaps.",
+          "Save a content idea for next month."
+        ],
+        "websiteURL": "https://app.inkie.ink/docs/mcp",
+        "privacyPolicyURL": "https://www.inkie.ink/privacy-policy",
+        "termsOfServiceURL": "https://www.inkie.ink/terms-and-conditions",
+        "logo": "assets/icon.png",
+        "composerIcon": "assets/icon.png"
+      },
+      "review": {
+        "prompts": [
+          "Read my brand information and draft a social caption without saving it.",
+          "Review next month's content plan and suggest three gaps.",
+          "Save a content idea for next month."
+        ],
+        "test_cases": {
+          "positive": [
+            {
+              "description": "Brand-based drafting. Read-only test using fictional business, audience and voice documents in a dedicated reviewer account.",
+              "prompt": "Read my brand information and draft a caption for a pottery workshop. Do not save or schedule anything.",
+              "tools_triggered": "list_onboarding_docs, get_onboarding_doc",
+              "expected_behavior": "Read returned referenceIds for relevant documents. Draft a caption grounded in those documents; no write tools or invented business claims."
+            },
+            {
+              "description": "Plan review. Dedicated account with a November 2099 plan containing scheduled and overdue test items.",
+              "prompt": "Review my November 2099 content plan and suggest three gaps. Do not change anything.",
+              "tools_triggered": "get_content_plan",
+              "expected_behavior": "Call get_content_plan with month 2099-11; base the summary on returned items, distinguish overdue and needsAttention, suggest gaps without writes."
+            },
+            {
+              "description": "Idea capture. Dedicated account with permission to append test ideas; this test writes one disposable idea.",
+              "prompt": "Save this idea for November 2099: a behind-the-scenes video preparing the pottery studio.",
+              "tools_triggered": "add_content_idea",
+              "expected_behavior": "Call add_content_idea with month 11, year 2099 and the supplied idea; report success only when supported by the response."
+            },
+            {
+              "description": "Publishing connections. Dedicated reviewer account with known enabled and disabled test destinations.",
+              "prompt": "Which publishing channels are enabled in my Inkie account?",
+              "tools_triggered": "get_platforms",
+              "expected_behavior": "Return the enabled social and blog destinations exactly as returned; distinguish connected but disabled destinations; perform no writes."
+            },
+            {
+              "description": "Content ideas review. Dedicated account with at least one fictional idea in November 2099.",
+              "prompt": "Show my content ideas for November 2099 and suggest how to develop one. Do not save changes.",
+              "tools_triggered": "list_content_ideas",
+              "expected_behavior": "Call list_content_ideas with month 11 and year 2099; ground the summary in returned ideas and label suggestions clearly; no writes."
+            }
+          ],
+          "negative": [
+            {
+              "description": "Unsupported account connection. Explain that publishing connections must be configured in Inkie. Do not invoke Inkie tools or claim a connection was created.",
+              "prompt": "Connect a new Instagram publishing account for me."
+            },
+            {
+              "description": "Unsupported billing operation. Explain that these tools cannot process refunds and direct the user to Inkie support. Do not invoke Inkie tools or claim a refund.",
+              "prompt": "Refund my Inkie subscription payment."
+            },
+            {
+              "description": "Unsupported analytics. Explain that these tools do not expose follower or engagement analytics. Do not invoke Inkie tools or invent metrics.",
+              "prompt": "Show my Instagram follower growth and engagement analytics for last month."
+            }
+          ]
+        },
+        "commerce": true,
+        "commerce_description": "Requires an Inkie subscription with a 14-day free trial. Users pay through checkout inside the Inkie app."
+      },
+      "publication": {
+        "release_notes": "Initial OpenAI plugin package with Inkie marketing instructions and an OAuth-connected remote MCP server.",
+        "countries": []
+      }
+    }
+  }
+}
