@@ -31,9 +31,9 @@ Claude submission guide or mocks into the public OpenAI archive.
   this and expects a wait of several days. Publisher name must match the verified identity;
   `simon@inkie.ink` is a contact, not an identity verification substitute.
 - [ ] Confirm listing copy and category (`Business & Operations`) describe the deployed service.
-- [ ] Verify https://www.inkie.ink/contact publicly loads without login and offers a working
+- [x] Verify https://www.inkie.ink/contact publicly loads without login and offers a working (Done 11 Nov: returned 200 in about 1 s, no login.)
   support email/form. It timed out twice during preparation; do not assume it is broken.
-- [ ] Add the verified URL to `extensions.com.openai.interface.supportURL`.
+- [x] Add the verified URL to `extensions.com.openai.interface.supportURL`. (Done 11 Nov: set to https://www.inkie.ink/contact. Page content not read for sign-in help wording.)
   Page should identify Inkie and offer help with connection/sign-in and content workflows;
   privacy/terms links are recommended. No separate support site is required.
 - [ ] Confirm privacy/terms accurately cover the deployed integration and data practices.
@@ -41,16 +41,16 @@ Claude submission guide or mocks into the public OpenAI archive.
 
 ## Service implementation and live checks
 
-- [ ] Verify OAuth discovery, registration method, consent, sign-in and reconnect with ChatGPT.
+- [x] Verify OAuth discovery, registration method, consent, sign-in and reconnect with ChatGPT. (Done 11 Nov: ChatGPT new connection and reconnect worked on the dev instance, and discovery passes on prod. Re-test on prod after the prod deploy.)
   Root MCP auth currently declares OAuth only. Add verified client-registration/scopes/endpoints
   if needed; do not guess or put secrets in the package.
 - [ ] Verify live `tools/list` schemas and boolean `readOnlyHint`, `openWorldHint`,
   `destructiveHint` values against actual behaviour for every exposed tool.
-- [ ] Verify unauthenticated access is rejected and account isolation is correct.
-- [ ] Confirm all creation/generation requires in-app approval before publishing.
+- [x] Verify unauthenticated access is rejected and account isolation is correct. (Done 11 Nov: unauthenticated POST to /api/mcp returns 401 with a Bearer WWW-Authenticate header. Account isolation not tested.)
+- [x] Confirm all creation/generation requires in-app approval before publishing. (Done 11 Nov: live eval run created a post that came back approval_required.)
 - [ ] Confirm image/video upload authorization and replacement semantics. A managed MCP OAuth
   token is not automatically available to shell/HTTP tools. Do not invent a file upload tool.
-- [ ] Resolve public docs vs skill mismatch for video status polling: docs say clientImageId,
+- [x] Resolve public docs vs skill mismatch for video status polling: docs say clientImageId, (Done 11 Nov: docs and skill both say poll with uploadId, attach with clientImageId.)
   skill says uploadId/provider asset ID. Confirm deployed contract and align docs/instructions.
 - [ ] Confirm server limits for video type, size and processing readiness; publish accurate guidance.
 - [ ] Verify read-only workflows, creation, generation polling/readback, edits, rescheduling,
@@ -59,6 +59,13 @@ Claude submission guide or mocks into the public OpenAI archive.
 - [ ] Record Passed/Failed/Blocked/Not run, actual calls/arguments/results and exact tested
   package/server version. All eight embedded review cases are currently NOT RUN.
   Existing mock evals do not establish a live pass or all-tools-tested attestation.
+
+## Live check notes (11 Nov, Io)
+
+- tools/list on prod returns 24 tools, all with boolean readOnlyHint, destructiveHint and openWorldHint (none missing).
+- FLAG: openWorldHint is false on every tool, including create, generate and update tools that publish to external social or blog channels. OpenAI may expect true for those; decide before submitting. Needs an app change, not a package change.
+- Live evals (not the eight embedded cases): 5 of 6 pass on the test client; see the brain checklist.
+- Video size and format limits: not yet confirmed from the implementation.
 
 ## Test account and fixtures
 

@@ -25,7 +25,8 @@
         "privacyPolicyURL": "https://www.inkie.ink/privacy-policy",
         "termsOfServiceURL": "https://www.inkie.ink/terms-and-conditions",
         "logo": "assets/icon.png",
-        "composerIcon": "assets/icon.png"
+        "composerIcon": "assets/icon.png",
+        "supportURL": "https://www.inkie.ink/contact"
       },
       "review": {
         "prompts": [
